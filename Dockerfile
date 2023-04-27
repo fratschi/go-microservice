@@ -16,8 +16,6 @@ ENV GO111MODULE="on" \
     GOOS=linux \
     GOFLAGS="-mod=vendor"
 
-EXPOSE ${APP_PORT}
-ENTRYPOINT ["sh"]
 
 ## Stage 2
 ## Downloading required modules and building go services in separate build environment
@@ -43,6 +41,9 @@ RUN adduser \
 ## Build
 RUN (([ ! -d "./vendor" ] && go mod download && go mod vendor) || true) && go build -ldflags="-s -w" -mod vendor  ./cmd/main.go && chmod +x main
 
+## remove all groups and users except serviceuser
+RUN cat /etc/passwd | grep -e "serviceuser" > /pwd  && cat /etc/group | grep -e "serviceuser" > /grp
+
 ## Stage 3
 ## Assemble final services container from an empty scratch image
 
@@ -51,8 +52,8 @@ FROM scratch AS service
 COPY --from=build /compile/main /service
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
+COPY --from=build /pwd /etc/passwd
+COPY --from=build /grp /etc/group
 
 EXPOSE 8080
 
