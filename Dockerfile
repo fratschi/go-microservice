@@ -2,7 +2,7 @@
 ## Multistage docker build for creating a smallest possible docker container
 ###################################################################################
 
-ARG GO_VERSION=1.17
+ARG GO_VERSION=1.20
 
 ## Stage 1
 ## Prepare dev environment for building services
@@ -41,15 +41,14 @@ RUN adduser \
     "${USER}"
 
 ## Build
-RUN (([ ! -d "./vendor" ] && go mod download && go mod vendor) || true) && go build -ldflags="-s -w" -mod vendor -o services ./cmd/main.go
-RUN chmod +x services
+RUN (([ ! -d "./vendor" ] && go mod download && go mod vendor) || true) && go build -ldflags="-s -w" -mod vendor  ./cmd/main.go && chmod +x main
 
 ## Stage 3
 ## Assemble final services container from an empty scratch image
 
 FROM scratch AS service
 
-COPY --from=build /compile/service /service
+COPY --from=build /compile/main /service
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
