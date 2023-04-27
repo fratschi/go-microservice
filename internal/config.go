@@ -20,8 +20,9 @@ type Service struct {
 }
 
 type Rest struct {
-	Port   int
-	Health int
+	Port   int `yaml:"port"`
+	Health int `yaml:"health"`
+	//Telemetry int `yaml:"telemetry"`
 }
 
 func (s Rest) PortValue() string {

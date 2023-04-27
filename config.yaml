@@ -6,6 +6,7 @@ service:
 rest:
   port: 8080
   health: 8081
+  #telemetry: 8082
 cors:
   allowedOrigins:
     - "*.whateveryoulike.com"

@@ -59,7 +59,19 @@ func Handle(router chi.Router, service services.Service, config *internal.Config
 		err = service.DoPost(d)
 
 		if err != nil {
-			std.WriteMessageResponse(writer, http.StatusInternalServerError, "internal error")
+			std.WriteMessageResponseLog(writer, http.StatusInternalServerError, "internal error")
+		}
+
+		writer.Header().Set("Content-Type", "application/json")
+
+		r := &PostResponse{
+			ID: req.ID,
+		}
+
+		err = json.NewEncoder(writer).Encode(r)
+
+		if err != nil {
+			std.WriteMessageResponseLog(writer, http.StatusInternalServerError, "internal error")
 		}
 	})
 
